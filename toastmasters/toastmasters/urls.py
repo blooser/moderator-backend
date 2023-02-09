@@ -27,5 +27,15 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path('', include(router.urls)),
     path('api/login', views.login),
+    path('api/meeting_update', views.meeting_update),
+    path('api/meeting', views.meeting),
+    path('api/speaker', views.speaker),
+    path('api/speakers', views.speakers),
+    path('api/feedback_update', views.feedback_update),
+    path('api/feedback', views.feedback),
+    path('api/feedback_pdf', views.feedback_pdf),
+    path('api/voting', views.voting),
+    path('api/voting_update', views.voting_update),
+    path('api/test', views.test),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework"))
 ]
