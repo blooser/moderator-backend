@@ -13,11 +13,12 @@ from rest_framework import status
 from pymongo import MongoClient
 
 from .meeting import Meeting, Voting, Feedback, PDF
+from .logger import create_logger
 
 import logging
 import base64
 
-logger = logging.getLogger("moderator")
+logger = create_logger("moderator")
 
 
 @api_view(["POST"])
@@ -45,6 +46,19 @@ class Store:
     voting = Voting()
     feedback = Feedback()
 
+
+
+def fail_if_bad_arguments(f):
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except IndexError:
+            return Response({
+                "Error": "Bad arguments"
+            }, status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    return wrapper
+    
 
 @api_view(["POST"])
 def meeting_update(request):
@@ -80,6 +94,7 @@ def get_by_index(collection, index):
 
 
 @api_view(["POST"])
+@fail_if_bad_arguments
 def speaker(request):
     data = request.data
 
@@ -104,6 +119,7 @@ def speakers(request):
 
 
 @api_view(["POST"])
+@fail_if_bad_arguments
 def feedback_update(request):
     data = request.data
 
@@ -113,7 +129,7 @@ def feedback_update(request):
     Store.feedback.update(speaker, answers)
 
     return Response({"Success": f"Feedback sent"})
-    
+
 
 @api_view(["GET"])
 def feedback(request):
@@ -123,6 +139,7 @@ def feedback(request):
 
 
 @api_view(["POST"])
+@fail_if_bad_arguments
 def feedback_pdf(request):
     data = request.data
 
@@ -139,6 +156,7 @@ def feedback_pdf(request):
 
 
 @api_view(["POST"])
+@fail_if_bad_arguments
 def voting_update(request):
     data = request.data
 
@@ -158,6 +176,22 @@ def voting(request):
         Store.voting.json()
     )
     
+
+@api_view(["POST"])
+@fail_if_bad_arguments
+def remove(request):
+    data = request.data
+
+    attr = data["attr"]
+    value = data["value"]
+
+    Store.meeting.remove(attr, value)
+    Store.voting.remove(attr, value)
+    Store.feedback.remove(attr, value)
+
+    return Response({
+        "Success", f"{value} has been removed"
+    })
 
 @api_view(["GET"])
 def test(request):

@@ -18,7 +18,7 @@ from django.urls import include, path
 
 from rest_framework import routers
 
-from toastmasters.moderator import views
+from .moderator import views
 
 
 router = routers.DefaultRouter()
@@ -36,6 +36,7 @@ urlpatterns = [
     path('api/feedback_pdf', views.feedback_pdf),
     path('api/voting', views.voting),
     path('api/voting_update', views.voting_update),
+    path('api/remove', views.remove),
     path('api/test', views.test),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework"))
 ]

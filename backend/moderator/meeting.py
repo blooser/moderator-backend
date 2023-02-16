@@ -1,11 +1,17 @@
 import logging
 import os
+import io
+import datetime
 
 from weasyprint import HTML
 from collections import Counter
+from .logger import create_logger
 
-logger = logging.getLogger("meeting")
+logger = create_logger("meeting")
 
+
+def today():
+    return datetime.datetime.today().strftime("%d.%m.%Y")
 
 
 class Meeting:
@@ -29,6 +35,11 @@ class Meeting:
 
                 setattr(self, key, list(data[key]))
 
+    def remove(self, attr, value):
+        try:
+            getattr(self, attr).remove(value)
+        except AttributeError:
+            pass
 
     def json(self):
         return {
@@ -57,6 +68,12 @@ class Voting:
 
     def update(self, attr, value):
         getattr(self, attr).update([value])
+
+    def remove(self, attr, value):
+        try:
+            del getattr(self, attr)[value]
+        except AttributeError:
+            pass
 
     def json(self):
         return {
@@ -92,6 +109,12 @@ class Feedback:
 
         self.speakers[speaker] = updated_data
 
+    def remove(self, attr, value):
+        try:
+            del getattr(self, attr)[value]
+        except AttributeError:
+            pass
+
     def json(self):
         return self.speakers
     
@@ -99,7 +122,7 @@ class Feedback:
 
 class PDF:
     HEADER = """
-    <h1>Informacja zwrotna dla {0}</h1> <br/><br/><br/>
+    <h1>Informacja zwrotna dla {0} ({1})</h1> <br/><br/><br/>
    """
 
     QUESTION = """
@@ -117,7 +140,7 @@ class PDF:
         self.data = data
 
     def get(self):
-        html = self.HEADER.format(self.speaker)
+        html = self.HEADER.format(self.speaker, today())
 
         for question in self.data:
             html += self.QUESTION.format(question)
@@ -126,14 +149,11 @@ class PDF:
                 html += self.ANSWER.format(answer)
 
             html += self.BREAK + self.BREAK
-
-        pdf_file = f"{self.speaker}.pdf"
+ 
+        pdf_file = io.BytesIO()
 
         HTML(string=html).write_pdf(pdf_file)
+        pdf_file.seek(0)
 
-        with open(pdf_file, "rb") as f:
-            return f.read()
-
-        # TODO: 
-        #os.remove(pdf_file)
-    
+        return pdf_file.read()
+   

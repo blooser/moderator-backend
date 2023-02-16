@@ -56,7 +56,7 @@ MIDDLEWARE = [
    
 ]
 
-ROOT_URLCONF = 'toastmasters.urls'
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -74,7 +74,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'toastmasters.wsgi.application'
+WSGI_APPLICATION = 'backend.wsgi.application'
 
 
 # Database
